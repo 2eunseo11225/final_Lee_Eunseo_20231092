@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Ink Swatch Studio</title>
+    <!-- Tailwind CSS for Modern Light-themed UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+KR:wght@300;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- p5.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f4f3ee;
+            color: #2d2a26;
+        }
+        .serif-title {
+            font-family: 'Cinzel', serif;
+        }
+        .kr-serif {
+            font-family: 'Noto Serif KR', serif;
+        }
+        /* Real Cotton Paper Texture Simulator */
+        .paper-swatch {
+            background-color: #faf8f5;
+            background-image: 
+                radial-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 0),
+                radial-gradient(rgba(0, 0, 0, 0.01) 1.5px, transparent 0);
+            background-size: 12px 12px, 24px 24px;
+            box-shadow: 
+                0 10px 30px -5px rgba(139, 134, 125, 0.15),
+                0 1px 3px rgba(0, 0, 0, 0.05),
+                inset 0 0 30px rgba(139, 134, 125, 0.05);
+            border: 1px solid rgba(218, 215, 205, 0.6);
+        }
+        /* Custom styled sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e6e4dc;
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #7a756b;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- HEADER -->
+    <header class="border-b border-[#dad7cd]/60 bg-[#faf8f5]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-[#7a756b] flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-feather-pointed text-white text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="serif-title text-lg font-bold tracking-wider text-[#2d2a26]">INK SWATCH STUDIO</h1>
+                    <p class="text-[9px] text-[#8b867d] font-semibold tracking-widest uppercase">p5.js Watercolor & Sheen Simulator</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1 rounded-full bg-[#7a756b]/10 text-[#7a756b] text-xs border border-[#7a756b]/20 flex items-center gap-1.5 font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#7a756b] animate-pulse"></span> Ready
+                </span>
+                <span class="text-xs text-[#8b867d] font-mono hidden md:inline">Art & Technology Final Project</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN STUDIO WORKSPACE -->
+    <main class="flex-grow max-w-6xl mx-auto w-full p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- LEFT CONTROL PANEL (5 Cols) -->
+        <section class="lg:col-span-5 bg-[#faf8f5] border border-[#dad7cd]/60 rounded-2xl p-6 shadow-sm space-y-5">
+            <div class="border-b border-[#dad7cd]/40 pb-3">
+                <h2 class="text-sm font-bold text-[#2d2a26] flex items-center gap-2 uppercase tracking-wider">
+                    <i class="fa-solid fa-palette text-[#7a756b]"></i> Swatch Customizer
+                </h2>
+                <p class="text-xs text-[#8b867d] mt-0.5">실제 스와치 카드의 질감과 컬러 메커니즘을 제어합니다.</p>
+            </div>
+
+            <!-- PRESETS QUICK SELECT -->
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-[#8b867d] tracking-wider uppercase block">명작 잉크 프리셋 (Quick Presets)</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="applyPreset('lord')" class="text-left bg-[#f4f3ee] hover:bg-[#e6e4dc] border border-[#dad7cd]/40 rounded-xl p-3 transition flex flex-col justify-between h-20 group">
+                        <span class="font-bold text-xs text-indigo-900 group-hover:text-indigo-950">소공자 (Little Lord)</span>
+                        <span class="text-[9px] text-[#8b867d]">로얄 블루 + 적동색 테 + 오팔 금펄</span>
+                    </button>
+                    <button onclick="applyPreset('tinker')" class="text-left bg-[#f4f3ee] hover:bg-[#e6e4dc] border border-[#dad7cd]/40 rounded-xl p-3 transition flex flex-col justify-between h-20 group">
+                        <span class="font-bold text-xs text-emerald-800 group-hover:text-emerald-900">팅커벨 (Tinker Bell)</span>
+                        <span class="text-[9px] text-[#8b867d]">세이지 그린 + 백은색 테 + 영롱 금펄</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONTROLS FORM -->
+            <div class="space-y-4 pt-2 border-t border-[#dad7cd]/40">
+                <!-- 1. BASE COLOR -->
+                <div class="bg-[#f4f3ee]/50 p-3 rounded-xl border border-[#dad7cd]/20 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-[#2d2a26]"><i class="fa-solid fa-droplet mr-1 text-[#7a756b]"></i> 1. 기본 잉크 (Base Ink)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="baseColor" value="#3b5998" onchange="syncColorInput('baseColor', this.value)" class="w-8 h-8 rounded-md cursor-pointer border border-[#dad7cd]">
+                        <input type="text" id="baseColorText" value="#3b5998" onchange="syncColorInput('baseColor', this.value)" class="bg-[#faf8f5] border border-[#dad7cd] rounded-lg text-[10px] font-mono px-2 py-1 w-24 text-center text-[#2d2a26]">
+                        <div class="flex-grow flex flex-col">
+                            <span class="text-[9px] text-[#8b867d] text-right">잉크 전체 투명도</span>
+                            <input type="range" id="shading" min="20" max="100" value="80" class="w-full accent-[#7a756b]">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. SHEEN CONTROL -->
+                <div class="bg-[#f4f3ee]/50 p-3 rounded-xl border border-[#dad7cd]/20 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-[#2d2a26]"><i class="fa-solid fa-ring mr-1 text-[#7a756b]"></i> 2. 가장자리 테 (Ink Sheen)</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="sheenActive" checked class="sr-only peer">
+                            <div class="w-8 h-4 bg-[#e6e4dc] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#dad7cd] after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#7a756b]"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="sheenColor" value="#9e2a2b" onchange="syncColorInput('sheenColor', this.value)" class="w-8 h-8 rounded-md cursor-pointer border border-[#dad7cd]">
+                        <input type="text" id="sheenColorText" value="#9e2a2b" onchange="syncColorInput('sheenColor', this.value)" class="bg-[#faf8f5] border border-[#dad7cd] rounded-lg text-[10px] font-mono px-2 py-1 w-24 text-center text-[#2d2a26]">
+                        <div class="flex-grow flex flex-col">
+                            <span class="text-[9px] text-[#8b867d] text-right">테 그라데이션 범위</span>
+                            <input type="range" id="sheenIntensity" min="10" max="100" value="45" class="w-full accent-[#7a756b]">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. SHIMMER CONTROL -->
+                <div class="bg-[#f4f3ee]/50 p-3 rounded-xl border border-[#dad7cd]/20 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-[#2d2a26]"><i class="fa-solid fa-sparkles mr-1 text-[#7a756b]"></i> 3. 반짝이 펄 (Shimmer)</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="shimmerActive" checked class="sr-only peer">
+                            <div class="w-8 h-4 bg-[#e6e4dc] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#dad7cd] after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#7a756b]"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="shimmerColor" value="#e9c46a" onchange="syncColorInput('shimmerColor', this.value)" class="w-8 h-8 rounded-md cursor-pointer border border-[#dad7cd]">
+                        <input type="text" id="shimmerColorText" value="#e9c46a" onchange="syncColorInput('shimmerColor', this.value)" class="bg-[#faf8f5] border border-[#dad7cd] rounded-lg text-[10px] font-mono px-2 py-1 w-24 text-center text-[#2d2a26]">
+                        <div class="flex-grow flex flex-col">
+                            <span class="text-[9px] text-[#8b867d] text-right">펄 밀도 (촘촘함)</span>
+                            <input type="range" id="shimmerDensity" min="100" max="850" value="600" class="w-full accent-[#7a756b]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-[10px] text-[#8b867d] bg-[#f4f3ee] p-2.5 rounded-lg text-center font-mono">
+                💡 마우스 커서를 우측 스와치 카드 위에서 움직여 보세요.<br>빛의 각도에 따른 펄의 반짝임이 실시간 렌더링됩니다.
+            </div>
+        </section>
+
+        <!-- RIGHT LIVE PREVIEW CARD (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col items-center gap-5">
+            
+            <!-- Real Ink Swatch Card Representation -->
+            <div id="swatchCard" class="paper-swatch w-[360px] md:w-[410px] h-[550px] rounded-xl p-6 flex flex-col justify-between transition-all duration-300">
+                
+                <!-- Swatch Header Text -->
+                <div class="flex justify-between items-start border-b border-[#dad7cd]/50 pb-3">
+                    <div class="space-y-0.5">
+                        <span class="text-[9px] uppercase font-bold tracking-widest text-[#8b867d] font-mono">Ink Project</span>
+                        <input type="text" id="brandInput" value="Frances Hodgson" class="bg-transparent border-b border-transparent hover:border-[#dad7cd] focus:border-[#7a756b] focus:outline-none text-[#2d2a26] font-semibold text-xs w-40 font-serif">
+                    </div>
+                    <div class="text-right space-y-0.5">
+                        <span class="text-[9px] uppercase font-bold tracking-widest text-[#8b867d] font-mono">Ink Name</span>
+                        <input type="text" id="nameInput" value="Little Lord" class="bg-transparent border-b border-transparent hover:border-[#dad7cd] focus:border-[#7a756b] focus:outline-none text-[#2d2a26] font-bold kr-serif text-sm w-40 text-right">
+                    </div>
+                </div>
+
+                <!-- p5.js Canvas Container -->
+                <div class="my-auto flex items-center justify-center relative cursor-crosshair">
+                    <div id="canvasContainer" class="rounded-lg"></div>
+                </div>
+
+                <!-- Card Footer metadata -->
+                <div class="border-t border-[#dad7cd]/50 pt-3 flex justify-between items-center text-[#8b867d] text-[9px] font-mono">
+                    <div class="flex gap-4">
+                        <div>
+                            <span class="font-bold text-[#8b867d]">SHEEN:</span> 
+                            <span id="cardSheenLabel" class="font-semibold">Active</span>
+                        </div>
+                        <div>
+                            <span class="font-bold text-[#8b867d]">SHIMMER:</span> 
+                            <span id="cardShimmerLabel" class="font-semibold">Active</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[#8b867d]">Wearingeul Style</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="flex gap-2.5 w-full max-w-[410px]">
+                <button onclick="shakeInk()" class="flex-1 py-3 px-4 bg-[#faf8f5] hover:bg-[#f4f3ee] border border-[#dad7cd] text-[#2d2a26] rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-sync text-[#7a756b]"></i> 잉크 흔들기 (재배치)
+                </button>
+                <button onclick="downloadSwatch()" class="flex-1 py-3 px-4 bg-[#7a756b] hover:bg-[#645f56] text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-download"></i> 스와치 저장 (.PNG)
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-[#dad7cd]/40 bg-[#faf8f5] py-4 text-center text-[10px] text-[#8b867d]">
+        <div class="max-w-7xl mx-auto">
+            <p>Digital Ink Swatch Studio © 2026. Made with p5.js for Art & Technology Showcase.</p>
+        </div>
+    </footer>
+
+    <!-- p5.js Sketch Script and Logic -->
+    <script>
+        // Synchronize color inputs
+        function syncColorInput(id, val) {
+            document.getElementById(id).value = val;
+            document.getElementById(id + 'Text').value = val;
+        }
+
+        // Global State Variables mapped directly to DOM
+        const DOM = {
+            baseColor: () => document.getElementById('baseColor').value,
+            shading: () => parseInt(document.getElementById('shading').value) / 100,
+            sheenActive: () => document.getElementById('sheenActive').checked,
+            sheenColor: () => document.getElementById('sheenColor').value,
+            sheenIntensity: () => parseInt(document.getElementById('sheenIntensity').value) / 100,
+            shimmerActive: () => document.getElementById('shimmerActive').checked,
+            shimmerColor: () => document.getElementById('shimmerColor').value,
+            shimmerDensity: () => parseInt(document.getElementById('shimmerDensity').value)
+        };
+
+        // p5.js Sketch implementation
+        const s = (p) => {
+            let brushStrokes = [];
+            let shimmerParticles = [];
+
+            p.setup = () => {
+                // Clear background blending
+                let canvas = p.createCanvas(360, 320);
+                canvas.parent('canvasContainer');
+                p.pixelDensity(2);
+                
+                generateInkStrokes();
+            };
+
+            p.draw = () => {
+                // Fully transparent base matching cards below
+                p.clear();
+                
+                // Sync labels
+                updateLabels();
+
+                // Draw realistic organic layers
+                // [Layer Cake Order]: 
+                // 1. Sheen outer gradient halo goes UNDER (if active)
+                if (DOM.sheenActive()) {
+                    drawSheenLayer();
+                }
+                // 2. Base Ink main body goes OVER Sheen
+                drawBaseInkLayer();
+                // 3. Delicate micro-shimmer particles go on top
+                if (DOM.shimmerActive()) {
+                    drawShimmerLayer();
+                }
+            };
+
+            // Generating highly realistic single-brush wet organic stroke
+            function generateInkStrokes() {
+                brushStrokes = [];
+                shimmerParticles = [];
+
+                // Simulation of a single massive vertical/diagonal sweeping calligraphic brush stroke
+                let fiberCount = 18; 
+                let segments = 60;
+                
+                for (let f = 0; f < fiberCount; f++) {
+                    let fiberPath = [];
+                    let offsetPercent = p.map(f, 0, fiberCount - 1, -1.0, 1.0);
+                    
+                    // Base stroke diagonal flow mimicking manual swiping
+                    let startX = 60 + offsetPercent * 18;
+                    let startY = 50 + p.random(-5, 5);
+                    let endX = 300 + offsetPercent * 32;
+                    let endY = 270 + p.random(-8, 8);
+                    
+                    // Gaps representation (some fibers don't draw in the middle - dry brush effect)
+                    let hasGap = p.random() < 0.22;
+                    let gapStart = p.random(0.3, 0.5);
+                    let gapEnd = gapStart + p.random(0.15, 0.25);
+
+                    for (let i = 0; i <= segments; i++) {
+                        let t = i / segments;
+                        
+                        // Skip if inside gap to simulate dry-brush empty spots
+                        if (hasGap && t > gapStart && t < gapEnd) continue;
+
+                        let x = p.lerp(startX, endX, t);
+                        // Add waving noise representing physical paint drag variation
+                        let yNoise = p.noise(t * 3.5, f * 12) * 55 - 25;
+                        let y = p.lerp(startY, endY, t) + yNoise;
+                        
+                        // Irregular fiber dot thickness
+                        let rNoise = p.noise(t * 5.5, f * 30) * 15;
+                        let r = p.map(p.sin(t * p.PI), 0, 1, 10, 34) + rNoise;
+
+                        fiberPath.push({ x: x, y: y, r: r, t: t });
+                    }
+                    brushStrokes.push(fiberPath);
+                }
+
+                // Place micro-shimmer particles uniformly along the stroke fibers
+                let totalShimmerCount = DOM.shimmerDensity();
+                let flatFibers = brushStrokes.flat();
+                
+                if (flatFibers.length > 0) {
+                    for (let s = 0; s < totalShimmerCount; s++) {
+                        let target = p.random(flatFibers);
+                        let angle = p.random(p.TWO_PI);
+                        let dist = p.random(target.r * 0.45); // Concentrate inside the wet ink path
+                        
+                        shimmerParticles.push({
+                            x: target.x + p.cos(angle) * dist,
+                            y: target.y + p.sin(angle) * dist,
+                            baseSize: p.random(0.35, 1.1), // Real tiny microscopic mineral glitter sizes
+                            phase: p.random(p.TWO_PI),
+                            speed: p.random(0.01, 0.03)
+                        });
+                    }
+                }
+            }
+
+            // Expose regeneration globally
+            window.rebuildStrokes = () => {
+                generateInkStrokes();
+            };
+
+            // 1. BASE INK LAYER: watercolor look with organic shading (Drawn OVER Sheen)
+            function drawBaseInkLayer() {
+                p.push();
+                p.noStroke();
+                
+                let baseHex = DOM.baseColor();
+                let shading = DOM.shading();
+                let col = hexToRgb(baseHex);
+
+                // Multi-pass watercolor rendering to build delicate, natural, non-circle transparency
+                // First pass: Soft bleeding edge (very light)
+                p.fill(col.r, col.g, col.b, 25 * shading);
+                brushStrokes.forEach(path => {
+                    path.forEach(pt => {
+                        p.ellipse(pt.x, pt.y, pt.r * 1.05, pt.r * 1.02);
+                    });
+                });
+
+                // Second pass: Main colored body
+                p.fill(col.r, col.g, col.b, 130 * shading);
+                brushStrokes.forEach(path => {
+                    path.forEach(pt => {
+                        p.ellipse(pt.x, pt.y, pt.r * 0.94, pt.r * 0.90);
+                    });
+                });
+
+                // Third pass: Random wet-pooling shading (no clean circles, organic texture only)
+                p.fill(col.r * 0.8, col.g * 0.8, col.b * 0.8, 85 * shading);
+                brushStrokes.forEach(path => {
+                    path.forEach((pt, idx) => {
+                        let poolNoise = p.noise(pt.x * 0.05, pt.y * 0.05);
+                        if (poolNoise > 0.58) {
+                            p.ellipse(pt.x, pt.y, pt.r * 0.78);
+                        }
+                    });
+                });
+                p.pop();
+            }
+
+            // 2. SHEEN LAYER: Outer gradient sheen halo (Drawn UNDER Base Ink)
+            function drawSheenLayer() {
+                p.push();
+                let sheenHex = DOM.sheenColor();
+                let intensity = DOM.sheenIntensity(); // Slider value representing spread/번짐 범위 (0.1 ~ 1.0)
+                let shading = DOM.shading(); // Sync ink opacity
+                let sCol = hexToRgb(sheenHex);
+                
+                let ctx = p.drawingContext;
+                
+                // We apply blur filter representing chromatography dye separation on edge boundaries
+                // Higher slider value = more blur/broader gradation spread
+                let blurRadius = p.map(intensity, 0.1, 1.0, 2, 14);
+                ctx.filter = `blur(${blurRadius}px)`; 
+                
+                p.noFill();
+                
+                // Draw layers of Sheen underneath that are slightly wider than base ink body
+                // Base opacity is also affected by the main ink opacity slider!
+                let sheenPasses = 3;
+                for (let pass = 0; pass < sheenPasses; pass++) {
+                    let scaleFactor = p.map(pass, 0, sheenPasses - 1, 1.15, 1.02);
+                    let opacity = p.map(pass, 0, sheenPasses - 1, 65, 160) * shading;
+                    
+                    p.fill(sCol.r, sCol.g, sCol.b, opacity);
+                    brushStrokes.forEach(path => {
+                        path.forEach(pt => {
+                            p.ellipse(pt.x, pt.y, pt.r * scaleFactor, pt.r * (scaleFactor - 0.05));
+                        });
+                    });
+                }
+
+                // Reset drawing states
+                ctx.filter = 'none';
+                p.pop();
+            }
+
+            // 3. SHIMMER LAYER: Tiny microscopic sparkling sand particles
+            function drawShimmerLayer() {
+                p.push();
+                let shimHex = DOM.shimmerColor();
+                let shading = DOM.shading(); // Shading controls shimmer alpha gently as well
+                let sCol = hexToRgb(shimHex);
+                
+                let ctx = p.drawingContext;
+
+                // Restrict sparkles inside the ink stain
+                ctx.globalCompositeOperation = 'source-atop';
+
+                shimmerParticles.forEach((pData) => {
+                    pData.phase += pData.speed;
+                    
+                    // Angle/Tilt Reflection: Microscopic sparkles shine according to mouse proximity (direction of light source)
+                    let d = p.dist(p.mouseX, p.mouseY, pData.x, pData.y);
+                    let reflection = p.max(0, 1 - (d / 120)); // Activates softly within 120px range
+                    
+                    // Very subtle twinkle animation to avoid hyperactive flashing
+                    let twinkle = p.abs(p.sin(pData.phase + p.frameCount * 0.02)) * 0.3 + 0.7;
+                    let opacity = p.min(255, (100 + reflection * 155) * twinkle) * shading;
+                    
+                    // Subtle, natural size modification (Max 1.25x scaling under light, keeping it tiny)
+                    let size = pData.baseSize * (1.0 + reflection * 0.25);
+
+                    // Under high reflection, instead of a big star, make it flash silvery-white like actual mica
+                    if (reflection > 0.78 && p.random() < 0.3) {
+                        p.fill(255, 255, 240, opacity); // White-hot metallic gloss
+                    } else {
+                        p.fill(sCol.r, sCol.g, sCol.b, opacity);
+                    }
+
+                    p.noStroke();
+                    p.ellipse(pData.x, pData.y, size * 2);
+                });
+
+                ctx.globalCompositeOperation = 'source-over';
+                p.pop();
+            }
+
+            function updateLabels() {
+                document.getElementById('cardSheenLabel').innerText = DOM.sheenActive() ? 'Active' : 'None';
+                document.getElementById('cardSheenLabel').className = DOM.sheenActive() ? 'text-[#a23945] font-semibold' : 'text-gray-400 font-semibold';
+                document.getElementById('cardShimmerLabel').innerText = DOM.shimmerActive() ? 'Active' : 'None';
+                document.getElementById('cardShimmerLabel').className = DOM.shimmerActive() ? 'text-amber-500 font-semibold' : 'text-gray-400 font-semibold';
+            }
+        };
+
+        // Initialize p5.js
+        let myp5 = new p5(s);
+
+        // Shake ink function
+        function shakeInk() {
+            const card = document.getElementById('swatchCard');
+            card.classList.add('scale-95', 'opacity-80');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-80');
+            }, 150);
+
+            if (typeof window.rebuildStrokes === 'function') {
+                window.rebuildStrokes();
+            }
+        }
+
+        // Color Converter Utility
+        function hexToRgb(hex) {
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 59, g: 89, b: 152 };
+        }
+
+        // Preset Apply Mechanism (Tuned perfectly to Wearingeul swatch properties)
+        function applyPreset(presetName) {
+            if (presetName === 'lord') {
+                // Little Lord Fauntleroy Preset (소공자)
+                document.getElementById('baseColor').value = '#354f52';
+                document.getElementById('baseColorText').value = '#354f52';
+                document.getElementById('shading').value = '80';
+                
+                document.getElementById('sheenActive').checked = true;
+                document.getElementById('sheenColor').value = '#a23945';
+                document.getElementById('sheenColorText').value = '#a23945';
+                document.getElementById('sheenIntensity').value = '45';
+
+                document.getElementById('shimmerActive').checked = true;
+                document.getElementById('shimmerColor').value = '#dfb15b';
+                document.getElementById('shimmerColorText').value = '#dfb15b';
+                document.getElementById('shimmerDensity').value = '600';
+
+                document.getElementById('brandInput').value = "Frances Hodgson";
+                document.getElementById('nameInput').value = "Little Lord";
+            } else if (presetName === 'tinker') {
+                // Tinker Bell Preset (팅커벨)
+                document.getElementById('baseColor').value = '#8a9a86';
+                document.getElementById('baseColorText').value = '#8a9a86';
+                document.getElementById('shading').value = '65';
+                
+                document.getElementById('sheenActive').checked = true;
+                document.getElementById('sheenColor').value = '#d1d5db';
+                document.getElementById('sheenColorText').value = '#d1d5db';
+                document.getElementById('sheenIntensity').value = '60';
+
+                document.getElementById('shimmerActive').checked = true;
+                document.getElementById('shimmerColor').value = '#f5cb5c';
+                document.getElementById('shimmerColorText').value = '#f5cb5c';
+                document.getElementById('shimmerDensity').value = '680';
+
+                document.getElementById('brandInput').value = "Peter and Wendy";
+                document.getElementById('nameInput').value = "Tinker Bell";
+            }
+
+            if (typeof window.rebuildStrokes === 'function') {
+                window.rebuildStrokes();
+            }
+        }
+
+        // Premium Quality Swatch Downloader
+        function downloadSwatch() {
+            let exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 410 * 2;
+            exportCanvas.height = 550 * 2;
+            let ctx = exportCanvas.getContext('2d');
+            ctx.scale(2, 2);
+
+            // 1. Draw Base Ivory Paper texture
+            ctx.fillStyle = '#faf8f5';
+            ctx.fillRect(0, 0, 410, 550);
+
+            // Fine texture border
+            ctx.strokeStyle = 'rgba(218, 215, 205, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(10, 10, 390, 530);
+
+            // 2. Draw Text Meta
+            ctx.fillStyle = '#2d2a26';
+            ctx.font = 'bold 11px Courier New';
+            ctx.fillText('BRAND: ' + document.getElementById('brandInput').value.toUpperCase(), 25, 40);
+            ctx.fillText('INK:   ' + document.getElementById('nameInput').value, 25, 60);
+            
+            ctx.fillStyle = '#8b867d';
+            ctx.font = '9px Courier New';
+            ctx.fillText('DIGITAL INK SWATCH SIMULATOR V1.3', 25, 525);
+
+            // 3. Draw Rendered Canvas
+            let p5Canvas = document.querySelector('#canvasContainer canvas');
+            if (p5Canvas) {
+                ctx.drawImage(p5Canvas, 25, 100, 360, 320);
+            }
+
+            // Create Link & Trigger
+            let link = document.createElement('a');
+            link.download = `${document.getElementById('nameInput').value.replace(/\s+/g, '_')}_swatch.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
